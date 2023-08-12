@@ -1,5 +1,9 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, flash, redirect
+# from py.form import RegistrationForm, LoginForm
 
+import sys
+sys.path.insert(1, 'py')
+from form import RegistrationForm, LoginForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'c156f7e7f28ffd5594e1cae9a42c6303'
@@ -30,13 +34,25 @@ def home():
 def about():
     return render_template('about.html', title = 'About')
 
-@app.route("/login")
+@app.route("/login", methods=['GET', 'POST'])
 def login():
-    return render_template('login.html', title = 'Login')
+    form = LoginForm()
+    if form.validate_on_submit():
+        if form.email.data == 'admin@blog.com' and form.password.data == 'password':
+            flash(f'You have logged in!', 'success')
+            return redirect(url_for('home')) 
+        else:
+            flash(f'Login unsuccessful, please try again!', 'danger')
+            # return redirect(url_for('login')) 
+    return render_template('login.html', title = 'Login', form = form)
 
-@app.route("/register")
+@app.route("/register", methods=['GET', 'POST'])
 def register():
-    return render_template('register.html', title = 'Register')
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        flash(f'Account created for {form.username.data}!', 'success')
+        return redirect(url_for('home'))
+    return render_template('register.html', title = 'Register', form = form)
 
 
 if __name__ == '__main__':
